@@ -1,0 +1,6 @@
+name: kx-dashboards
+channels:
+  - kx
+  - conda-forge
+dependencies:
+  - kdb

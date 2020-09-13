@@ -1,0 +1,15 @@
+[Unit]
+Description=Kx Dashboards
+
+[Service]
+Type=forking
+User=jack
+Group=jack
+PIDFile=/opt/kx-dashboards/logs/kx-dashboards.pid
+ExecStart=/opt/kx-dashboards/bin/kx-dashboards.sh
+TimeoutSec=30s
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

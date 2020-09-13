@@ -1,0 +1,128 @@
+{
+    "Groups": [],
+    "Instances": [
+        {
+            "AmiLaunchIndex": 0,
+            "ImageId": "ami-08a2aed6e0a6f9c7d",
+            "InstanceId": "i-0d8478cbb17ed70be",
+            "InstanceType": "t3.large",
+            "KeyName": "aws-surface",
+            "LaunchTime": "2020-09-13T13:38:49.000Z",
+            "Monitoring": {
+                "State": "disabled"
+            },
+            "Placement": {
+                "AvailabilityZone": "eu-west-1a",
+                "GroupName": "",
+                "Tenancy": "default"
+            },
+            "PrivateDnsName": "ip-10-0-1-58.eu-west-1.compute.internal",
+            "PrivateIpAddress": "10.0.1.58",
+            "ProductCodes": [],
+            "PublicDnsName": "",
+            "State": {
+                "Code": 0,
+                "Name": "pending"
+            },
+            "StateTransitionReason": "",
+            "SubnetId": "subnet-0fa8ffdae6edb4f14",
+            "VpcId": "vpc-0b0b15002d76ba168",
+            "Architecture": "x86_64",
+            "BlockDeviceMappings": [],
+            "ClientToken": "",
+            "EbsOptimized": false,
+            "Hypervisor": "xen",
+            "IamInstanceProfile": {
+                "Arn": "arn:aws:iam::319631679975:instance-profile/IAM-role.dev-kdb",
+                "Id": "AIPAUU24IMHT7PM2YGS5E"
+            },
+            "NetworkInterfaces": [
+                {
+                    "Attachment": {
+                        "AttachTime": "2020-09-13T13:38:49.000Z",
+                        "AttachmentId": "eni-attach-0115918fcb0afd826",
+                        "DeleteOnTermination": true,
+                        "DeviceIndex": 0,
+                        "Status": "attaching"
+                    },
+                    "Description": "",
+                    "Groups": [
+                        {
+                            "GroupName": "eu-west-1.sg.dev-vpc.kdb-ssh",
+                            "GroupId": "sg-07076c90f3312f20d"
+                        }
+                    ],
+                    "Ipv6Addresses": [],
+                    "MacAddress": "0a:f9:7c:82:64:87",
+                    "NetworkInterfaceId": "eni-038863b6ad8c6d3ed",
+                    "OwnerId": "319631679975",
+                    "PrivateIpAddress": "10.0.1.58",
+                    "PrivateIpAddresses": [
+                        {
+                            "Primary": true,
+                            "PrivateIpAddress": "10.0.1.58"
+                        }
+                    ],
+                    "SourceDestCheck": true,
+                    "Status": "in-use",
+                    "SubnetId": "subnet-0fa8ffdae6edb4f14",
+                    "VpcId": "vpc-0b0b15002d76ba168"
+                }
+            ],
+            "RootDeviceName": "/dev/xvda",
+            "RootDeviceType": "ebs",
+            "SecurityGroups": [
+                {
+                    "GroupName": "eu-west-1.sg.dev-vpc.kdb-ssh",
+                    "GroupId": "sg-07076c90f3312f20d"
+                }
+            ],
+            "SourceDestCheck": true,
+            "StateReason": {
+                "Code": "pending",
+                "Message": "pending"
+            },
+            "Tags": [
+                {
+                    "Key": "S3_REPO",
+                    "Value": "aws-kx-dashboards"
+                },
+                {
+                    "Key": "APP_USER",
+                    "Value": "jack"
+                },
+                {
+                    "Key": "AMI_NAME",
+                    "Value": "null"
+                },
+                {
+                    "Key": "S3_BUCKET",
+                    "Value": "null"
+                },
+                {
+                    "Key": "GIT_REPO",
+                    "Value": "null"
+                },
+                {
+                    "Key": "INSTALL_DIR",
+                    "Value": "/home/jack/install_dir"
+                },
+                {
+                    "Key": "S3_INSTALLS",
+                    "Value": "packages"
+                },
+                {
+                    "Key": "KX_DASH_VERSION",
+                    "Value": "1.1.2"
+                },
+                {
+                    "Key": "APP_GROUP",
+                    "Value": "jack"
+                }
+            ],
+            "VirtualizationType": "hvm"
+        }
+    ],
+    "OwnerId": "319631679975",
+    "ReservationId": "r-05389a1381a167a3d"
+}
