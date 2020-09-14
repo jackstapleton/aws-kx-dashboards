@@ -90,7 +90,7 @@ echo "" >> ${APP_USERHOME}/.bash_profile
 echo "source ${MINICONDA_HOME}/etc/profile.d/conda.sh" >> ${APP_USERHOME}/.bash_profile
 echo "conda activate" >> ${APP_USERHOME}/.bash_profile
 
-sudo -i -u $APP_USER conda env create --file=${INSTALL_DIR}/aws-kx-dashboards/conda/kx-dashboards.yaml
+sudo -i -u $APP_USER conda env create --file=${INSTALL_DIR}/aws-kx-dashboards/config/kx-dashboards-conda-env.yaml
 echo "conda activate kx-dashboards" >> ${APP_USERHOME}/.bash_profile
 
 # download kx licence and place in q home
