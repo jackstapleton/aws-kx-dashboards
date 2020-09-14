@@ -41,16 +41,22 @@ export AMI_NAME=$(ec2_get_instance_tag $INSTANCEID AMI_NAME)
 export APP_USERHOME=/home/${APP_USER}
 
 if id "$APP_USER" &>/dev/null; then
+
     echo "$APP_USER exists"
+
 else
+
     echo "Creating $APP_USER"
     groupadd $APP_GROUP
     useradd $APP_USER --shell /bin/bash --home-dir $APP_USERHOME --create-home --gid $APP_GROUP
+
 fi
 
 # set up install directory
 if [[ "$INSTALL_DIR" == "null" ]]; then
+
     export INSTALL_DIR=${APP_USERHOME}/installs
+
 fi
 mkdir -p $INSTALL_DIR
 chown -R $APP_USER:$APP_GROUP $INSTALL_DIR
@@ -78,7 +84,7 @@ if [[ "$S3_REPO" != "null" ]]; then
 
 elif [[ "$GIT_REPO" != "null" ]];then
 
-    sudo -i -u $APP_USER git clone $GIT_REPO
+    sudo -i -u $APP_USER git clone $GIT_REPO $REPO_DIR
 
 else
 
