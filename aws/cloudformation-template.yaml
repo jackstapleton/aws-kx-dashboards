@@ -1,0 +1,216 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Kx Dashboards Web App Stack
+Parameters:
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "Amazon EC2 Configuration"
+        Parameters:
+          - AMI
+          - IAMROLE
+          - INSTANCETYPE
+          - SSHKEY
+      - Label:
+          default: "General Configuration"
+        Parameters:
+          - SUBNETID
+          - VPCID
+
+    ParameterLabels:
+      AMI:
+        default: "AMI Id"
+      IAMROLE:
+        default: "IAM Role ARN for EC2 Instances"
+      INSTANCETYPE:
+        default: "Kx Dashboards Instance Type"
+      SSHKEY:
+        default: "SSH Key"
+      SUBNETID:
+        default: "Subnet Id"
+      VPCID:
+        default: "VPC Id"
+
+Parameters:
+  AMI:
+    Type: AWS::EC2::Image::Id
+    Description: "Choose the AMI to use for the EC2 Instances"
+  SSHKEY:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: "Choose the ssh key that will be used to log on to the EC2 instances"
+  IAMROLE:
+    Type: AWS::EC2::IAM::ARN
+    Description: "Choose the iam role that will be used by the EC2 instances"
+  INSTANCETYPE:
+    Type: String
+    ConstraintDescription: "Must be a valid EC2 Instance Type"
+    Description: "Choose the Kx Dashboard EC2 Instance Type"
+  SUBNETID:
+    Type: AWS::EC2::Subnet::Id
+    Description: "Which Subnet should the EC2 Instances be deployed into"
+  VPCID:
+    Type: AWS::EC2::VPC::Id
+    Description: "Which VPC should the EC2 Instances be deployed into"
+
+Resources:
+
+  EC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: 'Security Group to allow SSH and TCP access for EC2 servers'
+      GroupName: !Sub '${AWS::Region}.${AWS::StackName}.ec2-sg'
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 22
+          IpProtocol: tcp
+          ToPort: 22
+      VpcId: !Ref VPCID
+
+  EC2SecurityGroupTcpIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: EC2SecurityGroup
+    Properties:
+      GroupId: !Ref EC2SecurityGroup
+      FromPort: 5010
+      IpProtocol: tcp
+      ToPort: 5020
+      SourceSecurityGroupId: !Ref EC2SecurityGroup
+
+  EC2LaunchTemplate:
+    Type: 'AWS::EC2::LaunchTemplate'
+    Properties:
+      LaunchTemplateData:
+        BlockDeviceMappings:
+            - DeviceName: /dev/xvda
+              Ebs:
+                VolumeSize: 8
+        IamInstanceProfile:
+          Arn: !GetAtt IAMInstanceProfile.Arn
+        ImageId: !Ref AMI
+        KeyName: !Ref SSHKEY
+        SecurityGroupIds:
+          - !Ref EC2SecurityGroup
+        UserData:
+          Fn::Base64:
+            !FindInMap [ Constants, UserData, Bootstrap ]
+      LaunchTemplateName: !Sub '${AWS::Region}.ec2-launch-template.${AWS::StackName}'
+
+  TickASG:
+    Type: 'AWS::AutoScaling::AutoScalingGroup'
+    Properties:
+      AutoScalingGroupName: !Sub '${AWS::Region}.ec2-asg.${AWS::StackName}-tick-asg'
+      Cooldown: 300
+      DesiredCapacity: 1
+      HealthCheckGracePeriod: 60
+      HealthCheckType: EC2
+      MaxSize: 1
+      MinSize: 0
+      MixedInstancesPolicy:
+        LaunchTemplate:
+          LaunchTemplateSpecification:
+            LaunchTemplateId: !Ref EC2LaunchTemplate
+            Version: 1
+          Overrides:
+            - InstanceType: !Ref INSTANCETYPE
+      Tags:
+        - Key: APP
+          PropagateAtLaunch: True
+          Value: tick-asg
+        - Key: EFS
+          PropagateAtLaunch: True
+          Value: !GetAtt EfsMountTarget.IpAddress
+        - Key: Name
+          PropagateAtLaunch: True
+          Value: !Sub '${AWS::Region}.ec2-instance.${AWS::StackName}-tick-asg'
+      TargetGroupARNs:
+        - !Ref DesignerTargetGroup
+      VPCZoneIdentifier:
+        - !Ref SUBNETID
+        
+  DesignerAutoscalingGroup:
+    Type: 'AWS::AutoScaling::AutoScalingGroup'
+    Properties:
+      AvailabilityZones:
+        - !Ref AZ1
+        - !Ref AZ2
+      Cooldown: 300
+      DesiredCapacity: 1
+      HealthCheckType: EC2
+      MaxSize: 1
+      MetricsCollection: !FindInMap [Constants, MetricsCollection, Default]
+      MinSize: 1
+      LaunchTemplate:
+        LaunchTemplateId: !Ref VisualLaunchTemplate
+        Version: 1
+      Tags:
+        - Key: PANOPTICON_VISUAL_POSITION
+          PropagateAtLaunch: True
+          Value: DESIGNER
+        - Key: Name
+          PropagateAtLaunch: True
+          Value:
+            Fn::Join:
+              - '.'
+              - - !Ref AWS::Region
+                - !FindInMap [EnvironmentsMap, !Ref ENV, EnvName]
+                - 'ec2-instance.ailabs'
+                - !Ref AWS::StackName
+                - 'panopticon-designer'
+      TargetGroupARNs:
+        - !Ref DesignerTargetGroup
+      VPCZoneIdentifier:
+        - !FindInMap [SubnetMap, !Ref AZ1, !Ref ENV]
+        - !FindInMap [SubnetMap, !Ref AZ2, !Ref ENV]
+
+  DesignerLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub 'pan-designer-elb-${CHANGENUMBER}'
+      Scheme: internal
+      SecurityGroups:
+        - !FindInMap [SecurityGroupMap, !Ref "AWS::Region", !Ref ENV]
+      Subnets:
+        - !FindInMap [InfraSubnetMap, !Ref AZ1, !Ref ENV]
+        - !FindInMap [InfraSubnetMap, !Ref AZ2, !Ref ENV]
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::Region}.elb.ailabs-panopticon-designer-server-${AWS::StackName}'
+      Type: application
+
+  DesignerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn: !Ref DesignerTargetGroup
+      LoadBalancerArn: !Ref DesignerLoadBalancer
+      Port: 80
+      Protocol: HTTP
+
+  DesignerTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckPath: /panopticon
+      Matcher:
+        HttpCode: 200,302
+      Name: !Sub 'pan-designer-tg-${CHANGENUMBER}'
+      Port: 8080
+      Protocol: HTTP
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::Region}.elb-tg.ailabs-panopticon-designer-server-${AWS::StackName}'
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 300
+        - Key: stickiness.enabled
+          Value: true
+        - Key: stickiness.type
+          Value: lb_cookie
+      TargetType: instance
+      VpcId: !Ref VPCID
+
+
+Outputs:
+  LoadBalancerDNSName:
+    Value: !GetAtt WebAppLoadBalancer.DNSName
