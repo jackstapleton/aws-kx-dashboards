@@ -3,8 +3,8 @@ Description=Kx Dashboards
 
 [Service]
 Type=forking
-User=jack
-Group=jack
+User=APP_USER_PLACEHOLDER
+Group=APP_GROUP_PLACEHOLDER
 PIDFile=/opt/kx-dashboards/logs/kx-dashboards.pid
 ExecStart=/opt/kx-dashboards/bin/kx-dashboards.sh
 TimeoutSec=30s

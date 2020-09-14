@@ -9,14 +9,14 @@
             }
         }
     ],
-    "ImageId": "ami-08a2aed6e0a6f9c7d",
+    "ImageId": "AWS_AMI_ID_PLACEHOLDER",
     "InstanceType": "t3.large",
-    "KeyName": "aws-surface",
+    "KeyName": "AWS_SSH_KEY_PLACEHOLDER",
     "SecurityGroupIds": [
-        "sg-07076c90f3312f20d"
+        "AWS_SECURITY_GROUP_ID_PLACEHOLDER"
     ],
-    "SubnetId": "subnet-0fa8ffdae6edb4f14",
+    "SubnetId": "AWS_SUBNET_ID_PLACEHOLDER",
     "IamInstanceProfile": {
-        "Name": "IAM-role.dev-kdb"
+        "Name": "AWS_IAM_ROLE_PLACEHOLDER"
     }
 }

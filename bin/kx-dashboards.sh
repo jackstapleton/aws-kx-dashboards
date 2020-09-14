@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 echo "Starting Kx Dashboards as $USER"
 
@@ -15,4 +15,4 @@ cd /opt/kx-dashboards/dash
 q dash.q -u 1 -p 10001 > $LOG.log 2> $LOG.err < /dev/null &
 
 # save pid of process to file for systemd to monitor
-echo $! > /opt/kx-dashboards/run/kx-dashboards.pid
+echo $! > /opt/kx-dashboards/logs/kx-dashboards.pid
