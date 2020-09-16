@@ -95,7 +95,7 @@ echo "conda activate kx-dashboards" >> ${APP_USERHOME}/.bash_profile
 
 # download kx licence and place in q home
 if [[ "$S3_KX_LIC" != "" ]]; then
-    sudo -i -u $APP_USER aws s3 sync s3://${S3_BUCKET}/${S3_KX_LIC} ${MINICONDA_HOME}/envs/kx-dashboards/q/
+    sudo -i -u $APP_USER aws s3 cp s3://${S3_BUCKET}/${S3_KX_LIC} ${MINICONDA_HOME}/envs/kx-dashboards/q/
 fi
 
 # unpack and set up dashboards
@@ -109,8 +109,8 @@ chown -R $APP_USER:$APP_GROUP $KX_DASH_HOME
 
 # set up kx-dashboards systemd service
 cp $REPO_DIR/config/kx-dashboards.service /etc/systemd/system/
-sed -i "s/APP_USER_PLACEHOLDER/$APP_USER/" kx-dashboards.service
-sed -i "s/APP_GROUP_PLACEHOLDER/$APP_GROUP/" kx-dashboards.service
+sed -i "s/APP_USER_PLACEHOLDER/$APP_USER/" /etc/systemd/system/kx-dashboards.service
+sed -i "s/APP_GROUP_PLACEHOLDER/$APP_GROUP/" /etc/systemd/system/kx-dashboards.service
 systemctl enable kx-dashboards
 
 # install nginx
